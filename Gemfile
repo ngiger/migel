@@ -2,6 +2,8 @@ source "https://rubygems.org"
 gem 'net-smtp', require: false
 gem 'net-imap', require: false
 gem 'net-pop', require: false
+gem 'csv'
+gem 'observer'
 
 gem 'ydbi'
 gem 'ydbd-pg'

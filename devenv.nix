@@ -5,7 +5,7 @@
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = [ pkgs.git pkgs.libyaml ];
+  packages = [ pkgs.git pkgs.libyaml pkgs.postgresql];
 
   enterShell = ''
     echo This is the devenv shell for migel
@@ -13,42 +13,19 @@
     ruby --version
   '';
 
+  # https://devenv.sh/languages/
+  # languages.nix.enable = true;
+
+  languages.ruby.enable = true;
+  languages.ruby.version = "3.4";
+  # Needed for gem mimemagic
   env.FREEDESKTOP_MIME_TYPES_PATH = "${pkgs.shared-mime-info}/share/mime/packages/freedesktop.org.xml";
 
   # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks.shellcheck.enable = true;
+  # pre-commit.hooks.shellcheck.enable = true;
 
-  languages.ruby.enable = true;
+  # https://devenv.sh/processes/
+  # processes.ping.exec = "ping example.com";
 
-  # uncomment one of the following to lines to define the ruby version
-  languages.ruby.versionFile = ./.ruby-version;
-  # languages.ruby.package = pkgs.ruby_3_2;
-
-  services.postgres = {
-    enable = true;
-    package = pkgs.postgresql_12;
-    listen_addresses = "0.0.0.0";
-    port = 5434;
-
-    initialDatabases = [
-      { name = "migel"; }
-    ];
-
-    initdbArgs =
-      [
-        "--locale=C"
-        "--encoding=UTF8"
-      ];
-
-    initialScript = ''
-      create role migel superuser login password null;
-      \connect migel;
-      \i 22:20-postgresql_database-migel-backup
-    '';
-  };
-
+  # See full reference at https://devenv.sh/reference/options/
 }
-
-# bundle install; bundle exec ruby bin/migeld
-# using PGversion 12 or greater results in
-# pg_attrdef.adsrc does not exist
