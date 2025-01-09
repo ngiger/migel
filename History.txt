@@ -1,3 +1,7 @@
+=== January 9, 2025
+* Ported to Ruby 3.5
+* Needs at least ruby 3.2 (because of activesupport)
+
 === 1.0.3 / Janaury 29, 2018
 
 * Ported to Ruby 2.5.0, added bin/admin (SBSM with rack based)
