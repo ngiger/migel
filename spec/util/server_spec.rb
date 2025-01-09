@@ -211,7 +211,7 @@ EOD
   it "_admin should return error message when StandardError happens during the method execution" do
     result = []
     @server._admin('Server.hogehoge', result)
-    expect(result).to match([/undefined method 'hogehoge'.*Migel::Util::Server/])
+    expect(result).to match([/undefined method [`']hogehoge'.*Migel::Util::Server/])
   end
   it "init_fulltext_index_tables should raise nothing" do
     allow(ODBA.cache).to receive(:fetch_named).and_return({})
