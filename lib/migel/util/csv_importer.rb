@@ -208,10 +208,10 @@ module Migel
       end
 
       def restart_migel_server(sleep_time = defined?(RSpec) ? 0 : 5)
-        pid = `/bin/ps  -C ruby -Opid | /bin/grep migeld | /usr/bin/awk '{print $1}'`
+        pid = `/usr/bin/env ps  -C ruby -Opid | /usr/bin/env grep migeld | /usr/bin/env awk '{print $1}'`
         if pid.to_i != 0
           puts("restarting migel server. Pid to kill is #{pid}")
-          res = system("/bin/kill #{pid}")
+          res = system("/usr/bin/env kill #{pid}")
           sleep(sleep_time)
           puts("#{Time.now}: restart_export_server. Done sleeping #{sleep_time} seconds. res was #{res}")
         else
@@ -277,5 +277,4 @@ module Migel
       end
     end
   end
-  include Migel::Util
 end

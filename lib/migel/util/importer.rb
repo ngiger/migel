@@ -46,7 +46,7 @@ module Migel
     class Importer
       attr_reader :data_dir, :xls_file
 
-      OriginalXLS = "https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls"  # rubocop:disable Naming/ConstantName
+      ORIGINALXLS = "https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls"
       SALE_TYPES = {
         "1" => :purchase,
         "2" => :rent,
@@ -72,7 +72,7 @@ module Migel
         @data_dir = File.expand_path("../../../data/csv", File.dirname(__FILE__))
         $stdout.sync = true
         FileUtils.mkdir_p @data_dir
-        @xls_file = File.join(@data_dir, File.basename(OriginalXLS))
+        @xls_file = File.join(@data_dir, File.basename(ORIGINALXLS))
         @start_time = Time.now
       end
 
@@ -111,7 +111,7 @@ module Migel
         puts "#{Time.now}: update_all using #{@xls_file}"
         base = File.basename(@xls_file, ".xls")
         xls = File.open(@xls_file, "wb+")
-        File.open(OriginalXLS) { |f| xls.write(f.read) }
+        File.open(ORIGINALXLS) { |f| xls.write(f.read) }
         xls.close
         act_content = File.read(@xls_file)
 
@@ -122,7 +122,7 @@ module Migel
         end
         return if File.exist?(latest) && File.read(latest) == act_content
 
-        puts "#{Time.now}: update_all #{@xls_file} taken from #{OriginalXLS}"
+        puts "#{Time.now}: update_all #{@xls_file} taken from #{ORIGINALXLS}"
         book = Spreadsheet.open @xls_file
         LANGUAGE_NAMES.each do |language, name|
           sheet = book.worksheet(name)
@@ -324,7 +324,7 @@ module Migel
         compressed_file = compress(@csv_file)
         historicize(compressed_file)
         lines.concat report(lang)
-      rescue StandardError => e
+      rescue => e
         lines.push(e.class.to_s, e.message, *e.backtrace)
         lines.concat report
       ensure
@@ -571,6 +571,5 @@ module Migel
       end
     end
   end
+  include Migel::Util
 end
-
-include Migel::Util

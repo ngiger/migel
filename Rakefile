@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+
+lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'migel/version'
-require 'rspec/core/rake_task'
-require 'standard/rake'
+require "migel/version"
+require "rspec/core/rake_task"
+require "standard/rake"
 
 RSpec::Core::RakeTask.new(:spec)
 
-task :spec => :clean
+task spec: :clean
 
-require 'rake/clean'
-CLEAN.include FileList['pkg/*.gem']
+require "rake/clean"
+CLEAN.include FileList["pkg/*.gem"]

@@ -1,16 +1,16 @@
 #!/usr/local/bin/ruby
 # must be scheduled in crontab to run as the same user as oddb
 
-$: << File.expand_path('../lib', File.dirname(__FILE__))
-$: << File.expand_path('..', File.dirname(__FILE__))
+$: << File.expand_path("../lib", File.dirname(__FILE__))
+$: << File.expand_path("..", File.dirname(__FILE__))
 
-require 'migel/util/job'
-require 'migel/util/importer'
+require "migel/util/job"
+require "migel/util/importer"
 
 module Migel
   module Util
     Job.run do |system|
-      Importer.new.save_all_products_all_languages({:report => false, :estimate => true} )
+      Importer.new.save_all_products_all_languages({report: false, estimate: true})
       Importer.new.update_all
       system.init_fulltext_index_tables
     end
