@@ -1,13 +1,16 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Util::Multilingual -- migel -- 26.08.2011 -- mhatakeyama@ywesee.com
 
+require 'English'
 module Migel
   module Util
     module M10lMethods
       include Comparable
       attr_reader :canonical
       attr_reader :synonyms
+
       def initialize(canonical = {})
         @canonical = canonical
       end
@@ -25,14 +28,14 @@ module Migel
         when /^[a-z]{2}$/
           @canonical[meth]
         when /^([a-z]{2})=$/
-          @canonical.store($~[1].to_sym, args.first)
+          @canonical.store($LAST_MATCH_INFO[1].to_sym, args.first)
         else
           super
         end
       end
 
       def to_s
-        @canonical.values.compact.sort.first.to_s
+        @canonical.values.compact.min.to_s
       end
 
       def ==(other)
@@ -68,7 +71,7 @@ module Migel
 
       def all
         terms = super.concat(@synonyms).compact
-        terms.concat(terms.collect { |term| term.gsub(/[^\w]/, "") })
+        terms.concat(terms.collect { |term| term.gsub(/[^\w]/, '') })
         terms.uniq
       end
 
@@ -78,33 +81,33 @@ module Migel
 
       attr_writer :parent
 
-      def parent(arg = nil)
+      def parent(_arg = nil)
         # This is used when limitation_text is shown in ODDB::View::LimitationText
         @parent
       end
 
       def pointer
-        "pointer"
+        'pointer'
       end
 
       def de
         @canonical[:de]
       end
-      alias_method :en, :de
+      alias en de
       def fr
         @canonical[:fr]
       end
 
       # For PointerSteps (snapback links)
       def pointer_descr
-        "Limitation"
+        'Limitation'
       end
 
-      def structural_ancestors(app)
+      def structural_ancestors(_app)
         # [@parent.subgroup.group, @parent.subgroup, @parent]
         ancestors = []
         me = self
-        while parent = me.parent
+        while (parent = me.parent)
           ancestors.unshift parent
           me = parent
         end
@@ -112,19 +115,15 @@ module Migel
       end
 
       def force_encoding(code)
-        @canonical.values.each do |c|
-          if c.is_a?(String)
-            c.force_encoding(code)
-          end
+        @canonical.each_value do |c|
+          c.force_encoding(code) if c.is_a?(String)
         end
         @synonyms.each do |s|
-          if s.is_a?(String)
-            s.force_encoding(code)
-          end
+          s.force_encoding(code) if s.is_a?(String)
         end
       end
     end
   end
 end
 
-require "migel/util/m10l_document"
+require 'migel/util/m10l_document'

@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::SwissindexMigelPlugin -- migel -- 10.04.2012 -- yasaka@ywesee.com
 # Migel::Util::Swissindex          -- migel -- 07.09.2011 -- mhatakeyama@ywesee.com
 
-require "migel/ext/swissindex" # for dRuby
-require "migel/ext/refdata" # for dRuby
-require "migel/model"
-require "migel/util/logger"
+require 'migel/ext/swissindex' # for dRuby
+require 'migel/ext/refdata' # for dRuby
+require 'migel/model'
+require 'migel/util/logger'
 
 module ODDB
   module Swissindex
@@ -17,18 +18,19 @@ end
 module Migel
   class SwissindexMigelPlugin
     attr_reader :migel_codes_with_products, :migel_codes_without_products
-    SWISSINDEX_MIGEL_URI = "druby://localhost:50002"
+
+    SWISSINDEX_MIGEL_URI = 'druby://localhost:50002'
     SWISSINDEX_MIGEL_SERVER = DRbObject.new(nil, SWISSINDEX_MIGEL_URI)
     include Migel::Util
     def initialize(migel_codes)
       @migel_codes = migel_codes
     end
 
-    def get_migelid_by_migel_code(migel_code, lang = "de")
+    def get_migelid_by_migel_code(migel_code, _lang = 'de')
       Migel::Model::Migelid.find_by_migel_code(migel_code)
     end
 
-    def save_all_products(file_name = "migel_products_de.csv", lang = "de", estimate = false)
+    def save_all_products(file_name = 'migel_products_de.csv', lang = 'de', estimate = false)
       Migel.debug_msg "save_all_products #{file_name}. lang #{lang} #{@migel_codes.size} codes"
       @saved_products = 0
       @migel_codes_with_products = []
@@ -36,15 +38,15 @@ module Migel
       lang = lang.upcase
       start_time = Time.now
       total = @migel_codes.length
-      CSV.open(file_name, "w:utf-8") do |writer|
+      CSV.open(file_name, 'w:utf-8') do |writer|
         SWISSINDEX_MIGEL_SERVER.session(ODDB::Swissindex::SwissindexMigel) do |swissindex|
           @migel_codes.each_with_index do |migel_code, count|
             Migel.debug_msg "save_all_products migel_code #{migel_code} count #{count} Migel::DebugMigel #{Migel::DebugMigel}"
             # break if /2/.match(migel_code) and Migel::DebugMigel
             product_flag = false
-            if migelid = get_migelid_by_migel_code(migel_code)
-              migel_code = migelid.migel_code.split(".").join
-              table = swissindex.search_migel_table(migel_code, "MiGelCode", lang)
+            if (migelid = get_migelid_by_migel_code(migel_code))
+              migel_code = migelid.migel_code.split('.').join
+              table = swissindex.search_migel_table(migel_code, 'MiGelCode', lang)
               if table.empty?
                 Migel.debug_msg "search_migel_table returned table.empty? for migel_code #{migel_code} lang #{lang}"
               else
@@ -83,9 +85,9 @@ module Migel
             time = estimate_time(start_time, total, count + 1)
             puts time if estimate
           end
-        end # SWISSINDEX_MIGEL_SERVER
-        Migel.debug_msg "save_all_products done"
-      end # CSV.open
+        end
+        Migel.debug_msg 'save_all_products done'
+      end
       [
         @saved_products,
         @migel_codes_with_products,

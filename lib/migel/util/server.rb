@@ -1,24 +1,25 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Util::Server -- migel -- 02.10.2012 -- yasaka@ywesee.com
 # Migel::Util::Server -- migel -- 31.01.2012 -- mhatakeyama@ywesee.com
 
-require "sbsm/app"
-require "migel/util/importer"
-require "odba/drbwrapper"
-require "odba/18_19_loading_compatibility"
+require 'sbsm/app'
+require 'migel/util/importer'
+require 'odba/drbwrapper'
+require 'odba/18_19_loading_compatibility'
 # another monkey patch for CSV
 class CSV
-  puts "Attention: monkey-patching CSV::Cell"
+  puts 'Attention: monkey-patching CSV::Cell'
   # deprecated
   class Cell < String
     @@first = false
-    def initialize(data = "", is_null = false)
+    def initialize(data = '', is_null = false)
       unless @@first
         warn "Attention: monkey-patching CSV::Cell used by #{caller.join('\n')}"
         @@first = true
       end
-      super(is_null ? "" : data)
+      super(is_null ? '' : data)
     end
 
     def data
@@ -32,39 +33,39 @@ module Migel
     class Server < SBSM::App
       def _admin(src, result, priority = 0)
         @admin_threads ||= ThreadGroup.new
-        t = Thread.new {
+        t = Thread.new do
           Thread.current.abort_on_exception = false
           begin
             response = instance_eval(src)
             str = response.to_s
             result << if str.length > 200
-              response.class
-            else
-              str
-            end.to_s
-          rescue => error
-            result << (error ? error.message : "no msg")
+                        response.class
+                      else
+                        str
+                      end.to_s
+          rescue StandardError => e
+            result << (e ? e.message : 'no msg')
             if Migel.logger
-              Migel.logger.error("admin") { error.class }
-              Migel.logger.error("admin") { error.message }
-              Migel.logger.error("admin") { error.backtrace.pretty_inspect }
+              Migel.logger.error('admin') { e.class }
+              Migel.logger.error('admin') { e.message }
+              Migel.logger.error('admin') { e.backtrace.pretty_inspect }
             end
-            error
+            e
           end
-        }
+        end
         t[:source] = src
         t.priority = priority
         @admin_threads.add(t)
         t.join
       end
 
-      def unpeer_cache cache
+      def unpeer_cache(cache)
         ODBA.unpeer cache
       end
 
-      def export_products(file_name = "/var/www/migel/data/csv/migel_all_products_de.csv", lang = "de")
-        CSV.open(file_name, "w") do |writer|
-          all_products.values.sort_by { |prod| prod.migel_code }.each do |product|
+      def export_products(file_name = '/var/www/migel/data/csv/migel_all_products_de.csv', lang = 'de')
+        CSV.open(file_name, 'w') do |writer|
+          all_products.values.sort_by(&:migel_code).each do |product|
             writer << [
               product.migel_code,
               product.pharmacode,
@@ -87,15 +88,14 @@ module Migel
       end
 
       def export_all_products
-        export_products("/var/www/migel/data/csv/migel_all_products_de.csv", "de")
-        export_products("/var/www/migel/data/csv/migel_all_products_fr.csv", "fr")
+        export_products('/var/www/migel/data/csv/migel_all_products_de.csv', 'de')
+        export_products('/var/www/migel/data/csv/migel_all_products_fr.csv', 'fr')
       end
 
       # The following methods are for search
-      public
 
       def migelid_index_keys(lang, len = 1)
-        lang = "de" unless lang.to_s == "de" or lang.to_s == "fr"
+        lang = 'de' unless (lang.to_s == 'de') || (lang.to_s == 'fr')
         ODBA.cache.index_keys("migel_model_migelid_name_#{lang}", len)
       end
 
@@ -119,15 +119,13 @@ module Migel
         # search order
         # 1. Group, Subgroup, Migelid name fulltext search
         # 2. Group, Subgroup, Migelid name prefix search
-        if lang.to_s != "de" and lang.to_s != "fr"
-          lang = "de"
-        end
+        lang = 'de' if (lang.to_s != 'de') && (lang.to_s != 'fr')
         search_migelid_by_name(query, lang)
       end
 
       def sort_select_products(products, sortvalue, reverse = nil)
         products = products.select do |product|
-          !product.ean_code.nil? and product.status != "I"
+          !product.ean_code.nil? and product.status != 'I'
         end.sort_by do |item|
           if sortvalue.to_sym == :ppub
             item.ppub.to_f
@@ -138,16 +136,14 @@ module Migel
             end
           end
         end
-        if reverse
-          products.reverse!
-        end
+        products.reverse! if reverse
         products
       end
 
       def search_migel_product_by_migel_code(migel_code, sortvalue = nil, reverse = nil)
-        if migelid = Migel::Model::Migelid.search_by_migel_code(migel_code).first and products = migelid.products
+        if ((migelid = Migel::Model::Migelid.search_by_migel_code(migel_code).first)) && ((products = migelid.products))
           sortvalue ||= :pharmacode
-          if products = sort_select_products(products, sortvalue, reverse)
+          if (products = sort_select_products(products, sortvalue, reverse))
             ODBA::DRbWrapper.new(products)
           end
         end
@@ -156,21 +152,21 @@ module Migel
       private
 
       def search_migelid_fulltext(query, lang)
-        index_table_name = "migel_fulltext_index_" + lang
+        index_table_name = "migel_fulltext_index_#{lang}"
         result = ODBA.cache.retrieve_from_index(index_table_name, query)
         ODBA::DRbWrapper.new(result) unless result.empty?
       end
 
       def search_migelid_by_name(query, lang)
-        search_method = "search_by_name_" + lang
+        search_method = "search_by_name_#{lang}"
         result = []
-        if groups = Migel::Model::Group.send(search_method, query) and !groups.empty?
+        if ((groups = Migel::Model::Group.send(search_method, query))) && !groups.empty?
           groups.each do |group|
-            result.concat group.subgroups.collect { |sg| sg.migelids }.flatten
+            result.concat group.subgroups.collect(&:migelids).flatten
           end
         end
-        if subgroups = Migel::Model::Subgroup.send(search_method, query) and !subgroups.empty?
-          result.concat subgroups.collect { |sg| sg.migelids }.flatten
+        if ((subgroups = Migel::Model::Subgroup.send(search_method, query))) && !subgroups.empty?
+          result.concat subgroups.collect(&:migelids).flatten
         end
         result.concat Migel::Model::Migelid.send(search_method, query)
         ODBA::DRbWrapper.new(result.uniq)
@@ -180,23 +176,21 @@ module Migel
 
       def search_migel_product(query, lang, sortvalue = nil, reverse = nil)
         # search product by fulltext search
-        if lang.to_s != "de" and lang.to_s != "fr"
-          lang = "de"
-        end
-        index_table_name = "migel_product_fulltext_index_" + lang
+        lang = 'de' if (lang.to_s != 'de') && (lang.to_s != 'fr')
+        index_table_name = "migel_product_fulltext_index_#{lang}"
         result = ODBA.cache.retrieve_from_index(index_table_name, query)
         products = if result.empty?
-          # search product by name (prefix search)
-          search_method_article_name = "search_by_article_name_" + lang.downcase.to_s
-          search_method_company_name = "search_by_company_name_" + lang.downcase.to_s
-          result = Migel::Model::Product.send(search_method_article_name, query) + Migel::Model::Product.send(search_method_company_name, query)
-          result
-        else
-          result
-        end
+                     # search product by name (prefix search)
+                     search_method_article_name = "search_by_article_name_#{lang.downcase}"
+                     search_method_company_name = "search_by_company_name_#{lang.downcase}"
+                     Migel::Model::Product.send(search_method_article_name,
+                                                query) + Migel::Model::Product.send(
+                                                  search_method_company_name, query
+                                                )
+                   end
 
         sortvalue ||= :pharmacode
-        if products = sort_select_products(products, sortvalue, reverse)
+        if (products = sort_select_products(products, sortvalue, reverse))
           ODBA::DRbWrapper.new(products)
         end
       end
@@ -204,22 +198,21 @@ module Migel
       def search_limitation(migel_code)
         case migel_code.length
         when 2 # Group
-          if group = Migel::Model::Group.find_by_migel_code(migel_code)
+          if (group = Migel::Model::Group.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(group.limitation_text)
           end
         when 5 # Subgroup
-          if subgroup = Migel::Model::Subgroup.find_by_migel_code(migel_code)
+          if (subgroup = Migel::Model::Subgroup.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(subgroup.limitation_text)
           end
         else # Migelid
-          if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+          if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(migelid.limitation_text)
           end
         end
       end
 
       # The following methods are for initial setup
-      public
 
       def init_fulltext_index_tables
         puts "#{Time.now}:Starting init_fulltext_index_tables. init_migelids"
@@ -233,18 +226,18 @@ module Migel
 
       def init_migelids
         clear_migelids
-        ODBA.cache.index_keys("migel_model_migelid_migel_code").each do |migel_code|
+        ODBA.cache.index_keys('migel_model_migelid_migel_code').each do |migel_code|
           migelids.store(migel_code, Migel::Model::Migelid.find_by_migel_code(migel_code))
         end
         migelids.odba_store
       end
 
       def migelids
-        @migelids ||= ODBA.cache.fetch_named("all_migelids", self) {
+        @migelids ||= ODBA.cache.fetch_named('all_migelids', self) do
           {}
-        }
+        end
       end
-      alias_method :all_migelids, :migelids
+      alias all_migelids migelids
       def clear_migelids
         migelids.clear
         migelids.odba_store
@@ -252,7 +245,7 @@ module Migel
 
       def init_products(estimate = false)
         clear_products
-        pharmacode_list = ODBA.cache.index_keys("migel_model_product_pharmacode")
+        pharmacode_list = ODBA.cache.index_keys('migel_model_product_pharmacode')
         total = pharmacode_list.length
         start_time = Time.now
         pharmacode_list.each_with_index do |pharmacode, i|
@@ -263,11 +256,11 @@ module Migel
       end
 
       def products
-        @products ||= ODBA.cache.fetch_named("all_products", self) {
+        @products ||= ODBA.cache.fetch_named('all_products', self) do
           {}
-        }
+        end
       end
-      alias_method :all_products, :products
+      alias all_products products
       def clear_products
         products.clear
         products.odba_store
@@ -277,7 +270,7 @@ module Migel
         index_name = yaml_index_definition.index_name
         begin
           ODBA.cache.drop_index(index_name)
-        rescue
+        rescue StandardError
           # do nothing
         end
         ODBA.cache.create_index(yaml_index_definition, Migel)

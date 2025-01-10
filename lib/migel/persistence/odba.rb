@@ -1,16 +1,17 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Persistence::ODBA -- migel -- 17.08.2011 -- mhatakeyama@ywesee.com
 
-require "migel/config"
-require "odba"
-require "odba/connection_pool"
-require "odba/drbwrapper"
+require 'migel/config'
+require 'odba'
+require 'odba/connection_pool'
+require 'odba/drbwrapper'
 
-require "migel/persistence/odba/model/group"
-require "migel/persistence/odba/model/subgroup"
-require "migel/persistence/odba/model/migelid"
-require "migel/persistence/odba/model/product"
+require 'migel/persistence/odba/model/group'
+require 'migel/persistence/odba/model/subgroup'
+require 'migel/persistence/odba/model/migelid'
+require 'migel/persistence/odba/model/product'
 
 module Migel
   module Persistence

@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Model::Subgroup -- migel -- 06.09.2011 -- mhatakeyama@ywesee.com
 
@@ -9,23 +10,23 @@ module Migel
       # has_many :migelids, on_delete(:cascade), on_save(:cascade)
       has_many :migelids, on_delete(:cascade)
       attr_reader :code
-      alias_method :pointer_descr, :code
-      alias_method :products, :migelids
+      alias pointer_descr code
+      alias products migelids
       multilingual :limitation_text
       multilingual :name
       def initialize(code)
         @code = code
       end
 
-      def parent(app = nil)
+      def parent(_app = nil)
         @group
       end
 
       def migel_code
-        [group.code, code].join(".")
+        [group.code, code].join('.')
       end
 
-      def structural_ancestors(app)
+      def structural_ancestors(_app)
         [group]
       end
 

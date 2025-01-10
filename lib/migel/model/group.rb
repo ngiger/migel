@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Model::Group -- migel -- 06.09.2011 -- mhatakeyama@ywesee.com
 
@@ -6,16 +7,17 @@ module Migel
   module Model
     class Group < Migel::ModelSuper
       attr_reader :code
+
       has_many :subgroups, on_delete(:cascade) # , on_save(:cascade)
       multilingual :limitation_text
       multilingual :name
-      alias_method :pointer_descr, :code
-      alias_method :migel_code, :code
+      alias pointer_descr code
+      alias migel_code code
       def initialize(groupcd)
         @code = groupcd
       end
 
-      def parent(app = nil)
+      def parent(_app = nil)
         nil
       end
 

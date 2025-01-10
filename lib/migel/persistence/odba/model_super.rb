@@ -1,52 +1,49 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Model -- migel -- 17.08.2011 -- mhatakeyama@ywesee.com
 
-require "migel/model_super"
+require 'migel/model_super'
 
 module Migel
   class ModelSuper
     include ODBA::Persistable
-    unless instance_methods.include?("__odba_delete__")
-      alias_method :__odba_delete__, :delete
-    end
+    alias __odba_delete__ delete unless instance_methods.include?('__odba_delete__')
     def delete
       __odba_delete__
-      self.class.connectors.each { |name|
+      self.class.connectors.each do |name|
         if (conn = instance_variable_get(name))
           conn.odba_delete
         end
-      }
+      end
       odba_delete
     end
 
     def odba_serializables
       super.concat self.class.serializables
     end
-    unless instance_methods.include?("__odba_save__")
-      alias_method :__odba_save__, :save
-    end
+    alias __odba_save__ save unless instance_methods.include?('__odba_save__')
     def save
       __odba_save__
       odba_isolated_store
-      self.class.connectors.each { |name|
+      self.class.connectors.each do |name|
         if (conn = instance_variable_get(name)) && conn.respond_to?(:odba_store)
           conn.odba_store
         end
-      }
+      end
       self
     end
 
     def saved?
       !odba_unsaved?
     end
-    alias_method :uid, :odba_id
+    alias uid odba_id
     class << self
-      alias_method :all, :odba_extent
-      alias_method :count, :odba_count
+      alias all odba_extent
+      alias count odba_count
       def find_by_uid(uid)
         obj = ODBA.cache.fetch(uid)
-        obj if obj.class == self
+        obj if obj.instance_of?(self)
       end
 
       def serializables
@@ -62,11 +59,11 @@ module Migel
       end
 
       def serialize(*keys)
-        keys.each { |key|
+        keys.each do |key|
           name = "@#{key}"
           connectors.delete(name)
           serializables.push(name)
-        }
+        end
       end
     end
     serialize :data_origins

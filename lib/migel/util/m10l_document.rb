@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Util::M10lDocument -- migel -- 17.08.2011 -- mhatakeyama@ywesee.com
 
-require "migel/model_super"
-require "migel/util/multilingual"
+require 'English'
+require 'migel/model_super'
+require 'migel/util/multilingual'
 
 module Migel
   module Util
@@ -11,6 +13,7 @@ module Migel
       include M10lMethods
       connector :canonical
       attr_reader :previous_sources
+
       def initialize(canonical = {})
         super
         @previous_sources = {}
@@ -31,7 +34,7 @@ module Migel
       def method_missing(meth, *args, &block)
         case meth.to_s
         when /^([a-z]{2})=$/
-          lang = $~[1].to_sym
+          lang = $LAST_MATCH_INFO[1].to_sym
           if (previous = @canonical[lang])
             add_previous_source(lang, previous.source)
           end

@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Model::Migelid -- migel -- 02.10.2012 -- yasaka@ywesee.com
 # Migel::Model::Migelid -- migel -- 31.01.2012 -- mhatakeyama@ywesee.com
@@ -21,44 +22,44 @@ module Migel
       has_many :migelids
       attr_accessor :limitation, :price, :type, :qty, :date
       attr_reader :code
-      alias_method :pointer_descr, :code
-      alias_method :items, :products
+      alias pointer_descr code
+      alias items products
       multilingual :limitation_text
       multilingual :migelid_text
       multilingual :name
       multilingual :unit
-      alias_method :product_text, :migelid_text
+      alias product_text migelid_text
       def initialize(code)
         @code = code
       end
 
       def migel_code
-        [subgroup.migel_code, code].join(".")
-      rescue
-        ""
+        [subgroup.migel_code, code].join('.')
+      rescue StandardError
+        ''
       end
 
-      def parent(app = nil)
+      def parent(_app = nil)
         @subgroup
       end
 
       def update_multilingual(data, language)
-        data.keys.each do |key|
+        data.each_key do |key|
           # self.send(key, true).send(language.to_s + '=', data[key])
-          send(key).send(language.to_s + "=", data[key])
+          send(key).send("#{language}=", data[key])
         end
-        if @limitation_text
-          @limitation_text.parent = self
-        end
+        return unless @limitation_text
+
+        @limitation_text.parent = self
       end
 
-      def full_description(lang = "de")
+      def full_description(lang = 'de')
         [
-          subgroup.group.name.send(lang) || "",
-          subgroup.name.send(lang) || "",
+          subgroup.group.name.send(lang) || '',
+          subgroup.name.send(lang) || '',
           name.send(lang),
-          (migelid_text&.send(lang) or "")
-        ].map { |text| text.force_encoding("utf-8") }.join(" ")
+          (migelid_text&.send(lang) or '')
+        ].map { |text| text.force_encoding('utf-8') }.join(' ')
       end
 
       def add_accessory(acc)
@@ -77,7 +78,7 @@ module Migel
         name.send(language)
       end
 
-      def structural_ancestors(app)
+      def structural_ancestors(_app)
         # This is necessary for the snapback links of view class in migel DRb client (oddb.org/src/view/migel/product.rb)
         [group, subgroup]
       end

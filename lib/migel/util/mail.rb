@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Migel::Util::Mail -- migel -- 10.01.2012 -- mhatakeyama@ywesee.com
 
-require "net/smtp"
-require "migel/config"
-require "mail"
-require "base64"
+require 'net/smtp'
+require 'migel/config'
+require 'mail'
+require 'base64'
 
 module Migel
   module Util
@@ -13,9 +14,9 @@ module Migel
       def self.notify_admins_attached(subj, lines, file)
         @@configured ||= false
         config = Migel.config
-        config.admins << Etc.getlogin if config.admins.size == 0
+        config.admins << Etc.getlogin if config.admins.empty?
         config.mail_from ||= Etc.getlogin
-        unless ::Mail.delivery_method.is_a?(::Mail::TestMailer) and !@@configured
+        unless ::Mail.delivery_method.is_a?(::Mail::TestMailer) && !@@configured
           ::Mail.defaults do
             delivery_method :smtp, {
               address: config.smtp_server,
@@ -33,9 +34,7 @@ module Migel
           from config.mail_from
           to config.admins
           body lines.join("\n")
-          if file
-            add_file filename: File.basename(file), content: File.read(file)
-          end
+          add_file filename: File.basename(file), content: File.read(file) if file
         end
       end
     end
