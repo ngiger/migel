@@ -3,9 +3,9 @@
 
 # Migel::Util::M10lDocument -- migel -- 17.08.2011 -- mhatakeyama@ywesee.com
 
-require 'English'
-require 'migel/model_super'
-require 'migel/util/multilingual'
+require "English"
+require "migel/model_super"
+require "migel/util/multilingual"
 
 module Migel
   module Util
@@ -29,6 +29,10 @@ module Migel
 
       def empty?
         @canonical.empty?
+      end
+
+      def respond_to_missing?
+        true
       end
 
       def method_missing(meth, *args, &block)

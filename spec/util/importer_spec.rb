@@ -478,8 +478,10 @@ describe Importer, "Examples" do
     it {is_expected.to eq(expected)}
   end
   describe '#compress' do
+    file_name = "#{Dir.tmpdir}/file"
     before do
       allow(File).to receive(:mtime)
+      File.open(file_name, 'w+') { |f| f.puts "#Created by #{__FILE__}/#{__LINE__}" }
       allow(File).to receive(:open)
       @gz = double('gz',
                  :mtime= => nil,
@@ -488,8 +490,8 @@ describe Importer, "Examples" do
                 )
       allow(Zlib::GzipWriter).to receive(:open).and_yield(@gz)
     end
-    subject {@importer.compress('file')}
-    it {is_expected.to eq('file.gz')}
+    subject {@importer.compress(file_name)}
+    it {is_expected.to eq("#{file_name}.gz")}
   end
   describe '#report_save_all_products' do
     before do

@@ -22,21 +22,21 @@ module Migel
       has_many :migelids
       attr_accessor :limitation, :price, :type, :qty, :date
       attr_reader :code
-      alias pointer_descr code
-      alias items products
+      alias_method :pointer_descr, :code
+      alias_method :items, :products
       multilingual :limitation_text
       multilingual :migelid_text
       multilingual :name
       multilingual :unit
-      alias product_text migelid_text
+      alias_method :product_text, :migelid_text
       def initialize(code)
         @code = code
       end
 
       def migel_code
-        [subgroup.migel_code, code].join('.')
-      rescue StandardError
-        ''
+        [subgroup.migel_code, code].join(".")
+      rescue
+        ""
       end
 
       def parent(_app = nil)
@@ -46,20 +46,20 @@ module Migel
       def update_multilingual(data, language)
         data.each_key do |key|
           # self.send(key, true).send(language.to_s + '=', data[key])
-          send(key).send("#{language}=", data[key])
+          send(key).send(:"#{language}=", data[key])
         end
         return unless @limitation_text
 
         @limitation_text.parent = self
       end
 
-      def full_description(lang = 'de')
+      def full_description(lang = "de")
         [
-          subgroup.group.name.send(lang) || '',
-          subgroup.name.send(lang) || '',
+          subgroup.group.name.send(lang) || "",
+          subgroup.name.send(lang) || "",
           name.send(lang),
-          (migelid_text&.send(lang) or '')
-        ].map { |text| text.force_encoding('utf-8') }.join(' ')
+          (migelid_text&.send(lang) or "")
+        ].map { |text| text.force_encoding("utf-8") }.join(" ")
       end
 
       def add_accessory(acc)

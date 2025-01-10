@@ -3,7 +3,7 @@
 
 # Migel::Util::Multilingual -- migel -- 26.08.2011 -- mhatakeyama@ywesee.com
 
-require 'English'
+require "English"
 module Migel
   module Util
     module M10lMethods
@@ -21,6 +21,10 @@ module Migel
 
       def empty?
         @canonical.empty?
+      end
+
+      def respond_to_missing?
+        true
       end
 
       def method_missing(meth, *args, &block)
@@ -71,7 +75,7 @@ module Migel
 
       def all
         terms = super.concat(@synonyms).compact
-        terms.concat(terms.collect { |term| term.gsub(/[^\w]/, '') })
+        terms.concat(terms.collect { |term| term.gsub(/[^\w]/, "") })
         terms.uniq
       end
 
@@ -87,20 +91,20 @@ module Migel
       end
 
       def pointer
-        'pointer'
+        "pointer"
       end
 
       def de
         @canonical[:de]
       end
-      alias en de
+      alias_method :en, :de
       def fr
         @canonical[:fr]
       end
 
       # For PointerSteps (snapback links)
       def pointer_descr
-        'Limitation'
+        "Limitation"
       end
 
       def structural_ancestors(_app)
@@ -126,4 +130,4 @@ module Migel
   end
 end
 
-require 'migel/util/m10l_document'
+require "migel/util/m10l_document"

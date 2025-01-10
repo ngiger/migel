@@ -3,12 +3,12 @@
 
 # Migel::Model -- migel -- 17.08.2011 -- mhatakeyama@ywesee.com
 
-require 'migel/model_super'
+require "migel/model_super"
 
 module Migel
   class ModelSuper
     include ODBA::Persistable
-    alias __odba_delete__ delete unless instance_methods.include?('__odba_delete__')
+    alias_method :__odba_delete__, :delete unless instance_methods.include?("__odba_delete__")
     def delete
       __odba_delete__
       self.class.connectors.each do |name|
@@ -22,7 +22,7 @@ module Migel
     def odba_serializables
       super.concat self.class.serializables
     end
-    alias __odba_save__ save unless instance_methods.include?('__odba_save__')
+    alias_method :__odba_save__, :save unless instance_methods.include?("__odba_save__")
     def save
       __odba_save__
       odba_isolated_store
@@ -37,10 +37,10 @@ module Migel
     def saved?
       !odba_unsaved?
     end
-    alias uid odba_id
+    alias_method :uid, :odba_id
     class << self
-      alias all odba_extent
-      alias count odba_count
+      alias_method :all, :odba_extent
+      alias_method :count, :odba_count
       def find_by_uid(uid)
         obj = ODBA.cache.fetch(uid)
         obj if obj.instance_of?(self)

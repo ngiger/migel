@@ -8,26 +8,26 @@ module Migel
   module Model
     class Product < Migel::ModelSuper
       belongs_to :migelid, delegates(:price, :qty, :unit, :migel_code)
-      alias pointer_descr migel_code
+      alias_method :pointer_descr, :migel_code
       attr_accessor :ean_code, :article_name, :companyname, :companyean, :ppha, :ppub, :factor, :pzr, :status,
-                    :datetime, :stdate, :language
+        :datetime, :stdate, :language
       attr_reader :pharmacode
 
       multilingual :article_name
       multilingual :companyname
       multilingual :size
-      alias description article_name
-      alias name article_name
-      alias company_name companyname
+      alias_method :description, :article_name
+      alias_method :name, :article_name
+      alias_method :company_name, :companyname
       def initialize(pharmacode)
         @pharmacode = pharmacode
       end
 
       def full_description(lang)
         [
-          (article_name.send(lang) or ''),
-          (companyname&.send(lang) or '')
-        ].map { |text| text.force_encoding('utf-8') }.join(' ')
+          (article_name.send(lang) or ""),
+          (companyname&.send(lang) or "")
+        ].map { |text| text.force_encoding("utf-8") }.join(" ")
       end
 
       def to_s

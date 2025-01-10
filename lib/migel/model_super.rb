@@ -3,7 +3,7 @@
 
 # Migel::Model::SuperModel -- migel -- 02.10.2012 -- yasaka@ywesee.com
 # Migel::Model::SuperModel -- migel -- 24.01.2012 -- mhatakeyama@ywesee.com
-require 'active_support/inflector' # for singularize
+require "active_support/inflector" # for singularize
 
 module Migel
   # forward definitions (circular dependency Model <-> M10lDocument)
@@ -39,7 +39,8 @@ module Migel
         end
       end
 
-      def delegate(action, next_level); end
+      def delegate(action, next_level)
+      end
 
       def execute(action, object)
         return unless action == @action
@@ -150,7 +151,7 @@ module Migel
         has_many :codes
         define_method(:code) do |*args|
           type, country = *args
-          codes.find { |code| code.is_for?(type, country || 'DE') }
+          codes.find { |code| code.is_for?(type, country || "DE") }
         end
       end
 
@@ -179,11 +180,12 @@ module Migel
         if respond_to?(:basename)
           basename.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
         else
-          to_s.split('::').last.downcase.to_s.singularize
+          to_s.split("::").last.downcase.to_s.singularize
         end
       end
 
-      def serialize(key); end
+      def serialize(key)
+      end
     end
     def data_origin(key)
       # print "data_origins.class = "
@@ -212,12 +214,16 @@ module Migel
     end
 
     def update_limitation_text(str, language)
-      limitation_text(true).send("#{language}=", str)
+      limitation_text(true).send(:"#{language}=", str)
       @limitation_text.parent = self
     end
 
     def pointer
-      'pointer'
+      "pointer"
+    end
+
+    def respond_to_missing?
+      true
     end
 
     def method_missing(meth, *args, &block)
@@ -230,4 +236,4 @@ module Migel
   end
 end
 
-require 'migel/util/m10l_document'
+require "migel/util/m10l_document"

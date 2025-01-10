@@ -11,8 +11,8 @@ module Migel
       has_many :subgroups, on_delete(:cascade) # , on_save(:cascade)
       multilingual :limitation_text
       multilingual :name
-      alias pointer_descr code
-      alias migel_code code
+      alias_method :pointer_descr, :code
+      alias_method :migel_code, :code
       def initialize(groupcd)
         @code = groupcd
       end

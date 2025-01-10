@@ -10,8 +10,8 @@ module Migel
       # has_many :migelids, on_delete(:cascade), on_save(:cascade)
       has_many :migelids, on_delete(:cascade)
       attr_reader :code
-      alias pointer_descr code
-      alias products migelids
+      alias_method :pointer_descr, :code
+      alias_method :products, :migelids
       multilingual :limitation_text
       multilingual :name
       def initialize(code)
@@ -23,7 +23,7 @@ module Migel
       end
 
       def migel_code
-        [group.code, code].join('.')
+        [group.code, code].join(".")
       end
 
       def structural_ancestors(_app)

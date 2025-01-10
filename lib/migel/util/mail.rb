@@ -3,10 +3,10 @@
 
 # Migel::Util::Mail -- migel -- 10.01.2012 -- mhatakeyama@ywesee.com
 
-require 'net/smtp'
-require 'migel/config'
-require 'mail'
-require 'base64'
+require "net/smtp"
+require "migel/config"
+require "mail"
+require "base64"
 
 module Migel
   module Util

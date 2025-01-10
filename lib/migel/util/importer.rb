@@ -4,41 +4,41 @@
 # Migel::Importer -- migel -- 13.02.2012 -- yasaka@ywesee.com
 # Migel::Importer -- migel -- 06.01.2012 -- mhatakeyama@ywesee.com
 
-require 'csv'
-require 'fileutils'
-require 'zlib'
-require 'migel/util/mail'
-require 'migel/plugin/swissindex'
-require 'spreadsheet'
-require 'open-uri'
-require 'migel/util/server'
+require "csv"
+require "fileutils"
+require "zlib"
+require "migel/util/mail"
+require "migel/plugin/swissindex"
+require "spreadsheet"
+require "open-uri"
+require "migel/util/server"
 
 module Migel
-  LANGUAGE_NAMES = { 'de' => 'MiGeL',
-                     'fr' => 'LiMA',
-                     'it' => 'EMAp' }.freeze
+  LANGUAGE_NAMES = {"de" => "MiGeL",
+                    "fr" => "LiMA",
+                    "it" => "EMAp"}.freeze
 
   module Util
     def estimate_time(start_time, total, count, lb = "\n")
       estimate = (Time.now - start_time) * total / count
-      log = "#{format('%3d', count.to_s)} / #{total}\t"
+      log = "#{format("%3d", count.to_s)} / #{total}\t"
       em = estimate / 60
       eh = em / 60
       rest = estimate - (Time.now - start_time)
       rm = rest / 60
       rh = rm / 60
-      log << 'Estimate total: '
+      log << "Estimate total: "
       log << if eh > 1.0
-               "#{'%.2f' % eh} [h]"
-             else
-               "#{'%.2f' % em} [m]"
-             end
-      log << ' It will be done in: '
+        "#{"%.2f" % eh} [h]"
+      else
+        "#{"%.2f" % em} [m]"
+      end
+      log << " It will be done in: "
       log << if rh > 1.0
-               "#{'%.2f' % rh} [h]"
-             else
-               "#{'%.2f' % rm} [m]"
-             end
+        "#{"%.2f" % rh} [h]"
+      else
+        "#{"%.2f" % rm} [m]"
+      end
       log << lb
       log
     end
@@ -46,30 +46,30 @@ module Migel
     class Importer
       attr_reader :data_dir, :xls_file
 
-      OriginalXLS = 'https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls'
+      OriginalXLS = "https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls"  # rubocop:disable Naming/ConstantName
       SALE_TYPES = {
-        '1' => :purchase,
-        '2' => :rent,
-        '3' => :both
+        "1" => :purchase,
+        "2" => :rent,
+        "3" => :both
       }.freeze
-      Produktegruppe_Nr = 0
-      Limitation_Produktegruppe = 1
-      Produktegruppe = 2
-      Beschreibung_Produktegruppe = 3
-      Kategorie_Nr = 4 #  Kategorie Nr
-      Kategorie = 6
-      Beschreibung_Kategorie = 7
-      Unterkategorie = 12
-      Positions_Nummer = 15
-      Limitation = 16
-      Bezeichnung = 17
-      Menge = 18
-      Einheit = 19
-      Max_Price = 20 #      Höchstvergütungsbetrag =
-      Revision_Valid_since = 22 # Revision Gültig ab
+      Produktegruppe_Nr = 0 # rubocop:disable Naming/ConstantName
+      Limitation_Produktegruppe = 1 # rubocop:disable Naming/ConstantName
+      Produktegruppe = 2 # rubocop:disable Naming/ConstantName
+      Beschreibung_Produktegruppe = 3 # rubocop:disable Naming/ConstantName
+      Kategorie_Nr = 4 #  Kategorie Nr  # rubocop:disable Naming/ConstantName
+      Kategorie = 6 # rubocop:disable Naming/ConstantName
+      Beschreibung_Kategorie = 7 # rubocop:disable Naming/ConstantName
+      Unterkategorie = 12 # rubocop:disable Naming/ConstantName
+      Positions_Nummer = 15 # rubocop:disable Naming/ConstantName
+      Limitation = 16 # rubocop:disable Naming/ConstantName
+      Bezeichnung = 17 # rubocop:disable Naming/ConstantName
+      Menge = 18 # rubocop:disable Naming/ConstantName
+      Einheit = 19 # rubocop:disable Naming/ConstantName
+      Max_Price = 20 #      Höchstvergütungsbetrag = # rubocop:disable Naming/ConstantName
+      Revision_Valid_since = 22 # Revision Gültig ab # rubocop:disable Naming/ConstantName
 
       def initialize
-        @data_dir = File.expand_path('../../../data/csv', File.dirname(__FILE__))
+        @data_dir = File.expand_path("../../../data/csv", File.dirname(__FILE__))
         $stdout.sync = true
         FileUtils.mkdir_p @data_dir
         @xls_file = File.join(@data_dir, File.basename(OriginalXLS))
@@ -77,7 +77,7 @@ module Migel
       end
 
       def date_object(date)
-        date = date.to_s.split('.')
+        date = date.to_s.split(".")
         return unless date.size == 3
 
         Date.new(date.at(2).to_i, date.at(1).to_i, date.at(0).to_i)
@@ -85,20 +85,20 @@ module Migel
 
       def check_headers(row)
         expected = {
-          Produktegruppe_Nr => 'Produktegruppe Nr',
-          Produktegruppe => 'Produktegruppe',
-          Beschreibung_Produktegruppe => 'Beschreibung Produktegruppe',
-          Kategorie_Nr => 'Kategorie Nr',
-          Kategorie => 'Kategorie',
-          Beschreibung_Kategorie => 'Beschreibung Kategorie',
-          Unterkategorie => 'Unterkategorie',
-          Positions_Nummer => 'Positions Nummer',
-          Limitation => 'Limitation',
-          Bezeichnung => 'Bezeichnung',
-          Menge => 'Menge',
-          Einheit => 'Einheit',
-          Max_Price => 'Höchstvergütungsbetrag',
-          Revision_Valid_since => 'Revision Gültig ab'
+          Produktegruppe_Nr => "Produktegruppe Nr",
+          Produktegruppe => "Produktegruppe",
+          Beschreibung_Produktegruppe => "Beschreibung Produktegruppe",
+          Kategorie_Nr => "Kategorie Nr",
+          Kategorie => "Kategorie",
+          Beschreibung_Kategorie => "Beschreibung Kategorie",
+          Unterkategorie => "Unterkategorie",
+          Positions_Nummer => "Positions Nummer",
+          Limitation => "Limitation",
+          Bezeichnung => "Bezeichnung",
+          Menge => "Menge",
+          Einheit => "Einheit",
+          Max_Price => "Höchstvergütungsbetrag",
+          Revision_Valid_since => "Revision Gültig ab"
         }
         expected.each do |key, value|
           next if row[key].eql?(value)
@@ -109,44 +109,44 @@ module Migel
 
       def update_all
         puts "#{Time.now}: update_all using #{@xls_file}"
-        base = File.basename(@xls_file, '.xls')
-        xls = File.open(@xls_file, 'wb+')
-        URI.open(OriginalXLS) { |f| xls.write(f.read) }
+        base = File.basename(@xls_file, ".xls")
+        xls = File.open(@xls_file, "wb+")
+        File.open(OriginalXLS) { |f| xls.write(f.read) }
         xls.close
-        actContent = File.read(@xls_file)
+        act_content = File.read(@xls_file)
 
         latest = File.join(@data_dir, "#{base}-latest.xls")
-        target = File.join(@data_dir, "#{base}-#{Time.now.strftime('%Y.%m.%d')}.xls")
-        if !File.exist?(target) || File.read(target) != actContent
+        target = File.join(@data_dir, "#{base}-#{Time.now.strftime("%Y.%m.%d")}.xls")
+        if !File.exist?(target) || File.read(target) != act_content
           FileUtils.cp(@xls_file, target, verbose: true, preserve: true)
         end
-        return if File.exist?(latest) && File.read(latest) == actContent
+        return if File.exist?(latest) && File.read(latest) == act_content
 
         puts "#{Time.now}: update_all #{@xls_file} taken from #{OriginalXLS}"
         book = Spreadsheet.open @xls_file
         LANGUAGE_NAMES.each do |language, name|
           sheet = book.worksheet(name)
-          check_headers(sheet.rows.first) if language.eql?('de')
+          check_headers(sheet.rows.first) if language.eql?("de")
           csv_name = File.join(@data_dir, "migel_#{language}.csv")
           idx = 0
-          CSV.open(csv_name, 'w', force_quotes: true) do |writer|
+          CSV.open(csv_name, "w", force_quotes: true) do |writer|
             sheet.rows.each do |row|
               next unless row.first
 
               # fix conversion to date
               if idx.positive?
                 begin
-                  if (date = Date.parse(row[Revision_Valid_since].to_s, '%Y.%m%.%d'))
-                    row[Revision_Valid_since] = date.strftime('%d.%m.%Y')
+                  if (date = Date.parse(row[Revision_Valid_since].to_s, "%Y.%m%.%d"))
+                    row[Revision_Valid_since] = date.strftime("%d.%m.%Y")
                   end
-                rescue StandardError => e
+                rescue => e
                   puts "Error in file #{csv_name} in line #{idx}: #{e}"
                 end
               end
               writer << row
               idx += 1
               if (idx % 500).zero?
-                puts "#{Time.now}: update_all #{language} #{@xls_file} at row #{idx} #{row.at(Positions_Nummer)}"
+                puts "#{Time.now}: update_all #{language} #{@xls_file} at row #{idx} #{row.at(POSITIONS_NUMMER)}"
               end
             end
           end
@@ -160,9 +160,9 @@ module Migel
         puts "#{Time.now}: update #{path} #{language}"
         # update Group, Subgroup, Migelid data from a csv file
         CSV.readlines(path)[1..].each do |row|
-          id = row.at(Positions_Nummer).to_s.split('.')
+          id = row.at(Positions_Nummer).to_s.split(".")
           if id.empty?
-            id = row.at(Kategorie_Nr).to_s.split('.')
+            id = row.at(Kategorie_Nr).to_s.split(".")
           else
             id[-1].replace(id[-1][0, 1])
           end
@@ -203,14 +203,14 @@ module Migel
             puts "#{Time.now}: UNABLE to update_group #{id} groupcd #{groupcd} #{language}"
             return
           end
-          group.name.send("#{language}=", row.at(Produktegruppe).to_s)
+          group.name.send(:"#{language}=", row.at(Produktegruppe).to_s)
           text = row.at(Beschreibung_Produktegruppe).to_s
-          text.tr!("\v", ' ')
+          text.tr!("\v", " ")
           text.dup.strip!
           group.update_limitation_text(text, language) unless text.empty?
           group.save
           group
-        rescue StandardError
+        rescue
           0
         end
       end
@@ -224,7 +224,7 @@ module Migel
           sg
         end
         subgroup.group = group
-        subgroup.name.send("#{language}=", row.at(Kategorie).to_s)
+        subgroup.name.send(:"#{language}=", row.at(Kategorie).to_s)
         if ((text = row.at(Beschreibung_Kategorie).to_s)) && !text.empty?
           subgroup.update_limitation_text(text, language)
         end
@@ -234,26 +234,26 @@ module Migel
 
       def update_migelid(id, subgroup, row, language)
         # take data from csv
-        migelidcd = id[2, 3].join('.')
+        migelidcd = id[2, 3].join(".")
         name = row.at(Unterkategorie).to_s
-        migelid_text = row.at(Bezeichnung).gsub(/[ \t]+/u, ' ')
+        migelid_text = row.at(Bezeichnung).gsub(/[ \t]+/u, " ")
         migelid_text.tr!("\v", "\n")
         limitation_text = if (idx = migelid_text.index(/Limitation|Limitazione/u))
-                            migelid_text.slice!(idx..-1).strip
-                          else
-                            ''
-                          end
+          migelid_text.slice!(idx..-1).strip
+        else
+          ""
+        end
         name = migelid_text.slice!(/^[^\n]+/u) if name.to_s.strip.empty?
         migelid_text.strip!
         type = SALE_TYPES[id.at(4)]
         price = (row.at(Max_Price).to_s[/\d[\d.]*/u].to_f * 100).round
         begin
           date = row.at(Revision_Valid_since) ? Date.parse(row.at(Revision_Valid_since)) : nil
-        rescue StandardError => e
+        rescue => e
           puts e
           0
         end
-        limitation = (row.at(Limitation) == 'L')
+        row.at(Limitation)
         qty = row.at(Menge).to_i
         unit = row.at(Einheit).to_s
         # save instance
@@ -264,7 +264,7 @@ module Migel
             subgroup.save
             mi
           end
-        rescue StandardError => e
+        rescue => e
           0
         end
         migelid.subgroup = subgroup
@@ -283,16 +283,16 @@ module Migel
         if migelid.date && migelid.date.year < 1900
           warn "#{__LINE__}: Problem with #{migelid.migel_code} #{migelid.date}"
         end
-        migelid.limitation = limitation
+        migelid.limitation = Limitation
         migelid.qty = qty if qty.positive?
 
-        if id[3] != '00'
+        if id[3] != "00"
           1.upto(3) do |num|
-            micd = [id[2], '00', num].join('.')
+            micd = [id[2], "00", num].join(".")
             if (mi = subgroup.migelids.find { |m| m.respond_to?(:code) && m.code == micd })
               migelid.add_migelid(mi)
             end
-          rescue StandardError => e
+          rescue => e
             #              require 'pry'; binding.pry
             puts "migel #{id} #{group} #{e}"
             0
@@ -303,7 +303,7 @@ module Migel
         migelid
       end
 
-      def save_all_products_all_languages(options = { report: false, estimate: false })
+      def save_all_products_all_languages(options = {report: false, estimate: false})
         LANGUAGE_NAMES.each_key do |language|
           file_name = File.join(@data_dir, "migel_products_#{language}.csv")
           reported_save_all_products(file_name, language, options[:estimate])
@@ -314,17 +314,17 @@ module Migel
       end
 
       # for import products
-      def reported_save_all_products(file_name = 'migel_products_de.csv', lang = 'de', estimate = false)
+      def reported_save_all_products(file_name = "migel_products_de.csv", lang = "de", estimate = false)
         @csv_file = File.join(@data_dir, File.basename(file_name))
         lines = [
-          format("%s: %s %s#reported_save_all_products(#{lang})", Time.now.strftime('%c'), Migel.config.server_name,
-                 self.class)
+          format("%s: %s %s#reported_save_all_products(#{lang})", Time.now.strftime("%c"), Migel.config.server_name,
+            self.class)
         ]
         save_all_products(@csv_file, lang, estimate)
         compressed_file = compress(@csv_file)
         historicize(compressed_file)
         lines.concat report(lang)
-      rescue Exception => e
+      rescue StandardError => e
         lines.push(e.class.to_s, e.message, *e.backtrace)
         lines.concat report
       ensure
@@ -333,10 +333,10 @@ module Migel
       end
 
       def historicize(filepath)
-        archive_path = File.expand_path('../../../data', File.dirname(__FILE__))
-        save_dir = File.join archive_path, 'csv'
+        archive_path = File.expand_path("../../../data", File.dirname(__FILE__))
+        save_dir = File.join archive_path, "csv"
         FileUtils.mkdir_p save_dir
-        archive = Date.today.strftime(filepath.gsub('.csv.gz', '-%Y.%m.%d.csv.gz'))
+        archive = Date.today.strftime(filepath.gsub(".csv.gz", "-%Y.%m.%d.csv.gz"))
         puts "#{Time.now}: historicize #{filepath} -> #{archive}. Size is #{File.size(filepath)}"
         FileUtils.cp(filepath, archive)
       end
@@ -352,21 +352,21 @@ module Migel
         compressed_filename
       end
 
-      def report(lang = 'de')
+      def report(lang = "de")
         lang = lang.downcase
         end_time = Time.now - @start_time
         @update_time = (end_time / 60.0).to_i
         res = [
-          "Total time to update: #{format('%.2f', @update_time)} [m]",
+          "Total time to update: #{format("%.2f", @update_time)} [m]",
           "Saved file: #{@csv_file}",
-          format('Total %5i Migelids (%5i Migelids have products / %5i Migelids have no products)',
-                 migel_code_list ? migel_code_list.length : 0,
-                 @migel_codes_with_products ? @migel_codes_with_products.length : 0,
-                 @migel_codes_without_products ? @migel_codes_without_products.length : 0),
+          format("Total %5i Migelids (%5i Migelids have products / %5i Migelids have no products)",
+            migel_code_list ? migel_code_list.length : 0,
+            @migel_codes_with_products ? @migel_codes_with_products.length : 0,
+            @migel_codes_without_products ? @migel_codes_without_products.length : 0),
           "Saved #{@saved_products} Products"
         ]
         res += [
-          '',
+          "",
           "Migelids with products (#{@migel_codes_with_products ? @migel_codes_with_products.length : 0})"
         ]
         if @migel_codes_with_products
@@ -375,7 +375,7 @@ module Migel
           end
         end
         res += [
-          '',
+          "",
           "Migelids without products (#{@migel_codes_without_products ? @migel_codes_without_products.length : 0})"
         ]
         if @migel_codes_without_products&.size&.positive?
@@ -389,7 +389,7 @@ module Migel
       def code_list(index_table_name, output_filename = nil)
         list = ODBA.cache.index_keys(index_table_name)
         if output_filename
-          File.open(output_filename, 'w') do |out|
+          File.open(output_filename, "w") do |out|
             out.print list.join("\n"), "\n"
           end
         end
@@ -398,7 +398,7 @@ module Migel
 
       def migel_code_list(output_filename = nil)
         @migel_code_list ||= begin
-          index_table_name = 'migel_model_migelid_migel_code'
+          index_table_name = "migel_model_migelid_migel_code"
           code_list(index_table_name, output_filename)
         end
         @migel_code_list ||= []
@@ -406,7 +406,7 @@ module Migel
 
       def pharmacode_list(output_filename = nil)
         @pharmacode_list ||= begin
-          index_table_name = 'migel_model_product_pharmacode'
+          index_table_name = "migel_model_product_pharmacode"
           code_list(index_table_name, output_filename)
         end
         @pharmacode_list ||= []
@@ -417,26 +417,26 @@ module Migel
           migelid = Migel::Model::Migelid.find_by_migel_code(migel_code) and migelid.products.empty?
         end
         if output_filename
-          File.open(output_filename, 'w') do |out|
+          File.open(output_filename, "w") do |out|
             out.print migel_codes.join("\n"), "\n"
           end
         end
         migel_codes
       end
 
-      def missing_article_name_migel_code_list(lang = 'de', output_filename = nil)
+      def missing_article_name_migel_code_list(lang = "de", output_filename = nil)
         migel_codes = migel_code_list.select do |migel_code|
           migelid = Migel::Model::Migelid.find_by_migel_code(migel_code) and !migelid.products.empty? and migelid.products.first.article_name.send(lang).to_s.empty?
         end
         if output_filename
-          File.open(output_filename, 'w') do |out|
+          File.open(output_filename, "w") do |out|
             out.print migel_codes.join("\n"), "\n"
           end
         end
         migel_codes
       end
 
-      def reimport_missing_data(lang = 'de', estimate = false)
+      def reimport_missing_data(lang = "de", estimate = false)
         migel_codes = missing_article_name_migel_code_list
 
         total = migel_codes.length
@@ -448,28 +448,28 @@ module Migel
         "#{migel_codes.length} migelids is updated."
       end
 
-      def save_all_products(file_name = 'migel_products_de.csv', lang = 'de', estimate = false)
+      def save_all_products(file_name = "migel_products_de.csv", lang = "de", estimate = false)
         plugin = Migel::SwissindexMigelPlugin.new(migel_code_list)
         @saved_products, @migel_codes_with_products, @migel_codes_without_products =
           plugin.save_all_products(file_name, lang, estimate)
       end
 
-      def import_all_products_from_csv(file_name = 'migel_products_de.csv', lang = 'de', estimate = false)
-        lang.upcase!
+      def import_all_products_from_csv(file_name = "migel_products_de.csv", lang = "de", estimate = false)
+        lang = lang.upcase
         start_time = Time.new
         total = File.readlines(file_name).to_a.length
         count = 0
         # update cache
         CSV.foreach(file_name) do |line|
           count += 1
-          line[0] = line[0].rjust(9, '0') if /^\d{8}$/.match?(line[0])
+          line[0] = line[0].rjust(9, "0") if /^\d{8}$/.match?(line[0])
           migel_code = if /^\d{9}$/.match?(line[0])
-                         line[0].split(/(\d\d)/).reject(&:empty?).join('.')
-                       elsif /^(\d\d)\.(\d\d)\.(\d\d)\.(\d\d)\.(\d)$/.match?(line[0])
-                         line[0]
-                       else
-                         '' # skip
-                       end
+            line[0].split(/(\d\d)/).reject(&:empty?).join(".")
+          elsif /^(\d\d)\.(\d\d)\.(\d\d)\.(\d\d)\.(\d)$/.match?(line[0])
+            line[0]
+          else
+            "" # skip
+          end
           if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             record = {
               pharmacode: line[1],
@@ -489,9 +489,9 @@ module Migel
             }
             update_product(migelid, record, lang)
             pharmacode_list.delete(line[1])
-            puts "updating: #{estimate_time(start_time, total, count, ' ')}migel_code: #{migel_code}" if estimate
+            puts "updating: #{estimate_time(start_time, total, count, " ")}migel_code: #{migel_code}" if estimate
           elsif estimate
-            puts "ignoring: #{estimate_time(start_time, total, count, ' ')}migel_code: #{migel_code}"
+            puts "ignoring: #{estimate_time(start_time, total, count, " ")}migel_code: #{migel_code}"
           end
         end
 
@@ -507,9 +507,9 @@ module Migel
             migelid.products.each(&:save)
             warn "#{__LINE__}: saving migelid #{migelid.migel_code} #{migelid.date}"
             migelid.save
-            puts "saving: #{estimate_time(start_time, total, count, ' ')}migel_code: #{migel_code}" if estimate
+            puts "saving: #{estimate_time(start_time, total, count, " ")}migel_code: #{migel_code}" if estimate
           elsif estimate
-            puts "ignoring: #{estimate_time(start_time, total, count, ' ')}migel_code: #{migel_code}"
+            puts "ignoring: #{estimate_time(start_time, total, count, " ")}migel_code: #{migel_code}"
           end
         end
 
@@ -519,10 +519,10 @@ module Migel
         end
       end
 
-      def update_products_by_migel_code(migel_code, lang = 'de')
-        lang.upcase!
+      def update_products_by_migel_code(migel_code, lang = "de")
+        lang = lang.upcase
         if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
-          migel_code = migelid.migel_code.split('.').to_s
+          migel_code = migelid.migel_code.split(".").to_s
           if (table = ODDB::Swissindex.search_migel_table(migel_code, lang))
             table.each do |record|
               update_product(migelid, record, lang) if record[:pharmacode] && record[:article_name]
@@ -536,7 +536,7 @@ module Migel
 
       private
 
-      def update_product(migelid, record, lang = 'de')
+      def update_product(migelid, record, lang = "de")
         lang.downcase!
         product = migelid.products.find { |i| i.pharmacode == record[:pharmacode] } || begin
           i = Migel::Model::Product.new(record[:pharmacode])
@@ -551,16 +551,16 @@ module Migel
 
         product.ean_code = record[:ean_code]
         # product.article_name = record[:article_name]
-        product.send(:article_name).send("#{lang}=", record[:article_name])
+        product.send(:article_name).send(:"#{lang}=", record[:article_name])
         # product.companyname  = record[:companyname]
-        product.send(:companyname).send("#{lang}=", record[:companyname])
+        product.send(:companyname).send(:"#{lang}=", record[:companyname])
         product.companyean = record[:companyean]
         product.ppha = record[:ppha]
         product.ppub = record[:ppub]
         product.factor = record[:factor]
         product.pzr = record[:pzr]
         # product.size         = record[:size]
-        product.send(:size).send("#{lang}=", record[:size])
+        product.send(:size).send(:"#{lang}=", record[:size])
         product.status = record[:status]
         product.datetime = record[:datetime]
         product.stdate = record[:stdate]

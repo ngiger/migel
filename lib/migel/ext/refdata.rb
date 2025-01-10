@@ -1,11 +1,11 @@
 #!/usr/bin/ruby
 # frozen_string_literal: true
 
-require 'rubygems'
-require 'savon'
-require 'mechanize'
-require 'drb'
-require 'odba/18_19_loading_compatibility'
+require "rubygems"
+require "savon"
+require "mechanize"
+require "drb"
+require "odba/18_19_loading_compatibility"
 
 module ODDB
   module Refdata
@@ -15,7 +15,7 @@ module ODDB
 
     # definition only
     class RefdataArticle
-      URI = 'druby://localhost:50001'
+      URI = "druby://localhost:50001"
       include DRb::DRbUndumped
     end
   end
