@@ -456,8 +456,11 @@ module Migel
         it { is_expected.to eq(expected) }
       end
       describe "#compress" do
+        file_name = "#{Dir.tmpdir}/file"
         before do
           allow(File).to receive(:mtime)
+          my_file = File.open(file_name, "w+") { |f| f.puts "#Created by #{__FILE__}/#{__LINE__}" }
+          puts "file_name: #{file_name}"
           allow(File).to receive(:open)
           @gz = double("gz",
             :mtime= => nil,
@@ -465,8 +468,8 @@ module Migel
             :puts => nil)
           allow(Zlib::GzipWriter).to receive(:open).and_yield(@gz)
         end
-        subject { @importer.compress("file") }
-        it { is_expected.to eq("file.gz") }
+        subject { @importer.compress(file_name) }
+        it { is_expected.to eq("#{file_name}.gz") }
       end
       describe "#report_save_all_products" do
         before do
