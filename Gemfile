@@ -2,6 +2,8 @@ source "https://rubygems.org"
 gem 'net-smtp', require: false
 gem 'net-imap', require: false
 gem 'net-pop', require: false
+gem 'csv'
+gem 'observer'
 
 gem 'ydbi'
 gem 'ydbd-pg'
@@ -9,7 +11,7 @@ gem 'webrick'
 gem 'odba', '>= 1.1.6'
 gem 'rclconf'
 gem 'mail', '< 2.8.0' # or you get an error about mail/indifferent_hash
-gem 'savon'#, '0.9.7'
+gem 'savon'
 gem 'mechanize'
 gem 'spreadsheet'
 gem 'deprecated', '< 3.0.0'
@@ -19,13 +21,13 @@ gem 'activesupport' # for sinularize
 gem 'psych', '< 4.0.0'
 group :development do
   gem 'rake'
+  gem 'standard'
   gem 'rspec'
-  gem 'flexmock', '< 2.0.0'
-  gem 'rack', '< 3.0.0'
-  gem 'json', '< 3.0.0'
+  gem 'flexmock'
+  gem 'rack'
+  gem 'json'
   gem 'webmock'
+  gem 'debug'
   gem 'simplecov'
-  gem 'rspec-mocks'# , '< 3.0.0'
-  gem 'travis-lint'
+  gem 'rspec-mocks'
 end
-
