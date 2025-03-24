@@ -1,6 +1,7 @@
 !*.xls
 #spec/data/*latest*
 data/
+etc/migel.yml
 *.csv
 *.patch
 .bundle/

@@ -10,14 +10,14 @@ require "open-uri"
 require "migel/util/server"
 require "migel/util/importer"
 require "migel/model/group"
-include Migel::Util
+include Migel::Util # rubocop:disable Style/MixinUsage
 
 module Migel
   module Util
     class CsvImporter
-      Status_csv_items = "A"
-      Companyname_DE = "Bauerfeind AG"
-      Companyname_FR = "Bauerfeind SA"
+      STATUS_CSV_ITEMS = "A"
+      COMPANYNAME_DE = "Bauerfeind AG"
+      COMPANYNAME_FR = "Bauerfeind SA"
       attr_reader :data_dir
       attr_reader :csv_file
       def initialize
@@ -37,7 +37,7 @@ module Migel
         @update_time = (end_time / 60.0).to_i
         res = [
           "Total time to update: #{"%.2f" % @update_time} [m]",
-          sprintf("found via %s or %s were. Active products before/now: %d/%d", Companyname_DE, Companyname_FR, @nr_products_before - @nr_products_after, get_nr_active_bauerfeind_products),
+          sprintf("found via %s or %s were. Active products before/now: %d/%d", COMPANYNAME_DE, COMPANYNAME_FR, @nr_products_before - @nr_products_after, get_nr_active_bauerfeind_products),
           "Read CSV-file: #{@csv_file}",
           sprintf("Total %5i Migelids (%5i Migelids have products / %5i Migelids have no products)",
             @nr_records,
@@ -100,7 +100,7 @@ module Migel
           end
           @nr_records += 1
           ean13 = line[1]
-          if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+          if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             pharmacode = line[4]
             nr_invalids = migelid.products.count { |i| i.pharmacode.to_i == 0 }
             if nr_invalids > 0
@@ -239,9 +239,9 @@ module Migel
         product.migelid = migelid
         product.pharmacode = key_value unless product.pharmacode.eql?(key_value)
         product.ean_code = record[:ean_code]
-        product.send(:companyname).send(:de=, Companyname_DE)
-        product.send(:companyname).send(:fr=, Companyname_FR)
-        product.status = Status_csv_items
+        product.send(:companyname).send(:de=, COMPANYNAME_DE)
+        product.send(:companyname).send(:fr=, COMPANYNAME_FR)
+        product.status = STATUS_CSV_ITEMS
         product.ppub = record[:ppub]
         product.send(:article_name).send(:de=, record[:article_name_de])
         product.send(:article_name).send(:fr=, record[:article_name_fr])

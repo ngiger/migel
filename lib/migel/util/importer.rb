@@ -45,33 +45,33 @@ module Migel
     class Importer
       attr_reader :data_dir
       attr_reader :xls_file
-      OriginalXLS = "https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls"
+      ORIGINAL_XLS = "https://github.com/zdavatz/oddb2xml_files/raw/master/MiGeL.xls"
       SALE_TYPES = {
         "1" => :purchase,
         "2" => :rent,
         "3" => :both
-      }
-      Produktegruppe_Nr = 0
-      Limitation_Produktegruppe = 1
-      Produktegruppe = 2
-      Beschreibung_Produktegruppe = 3
-      Kategorie_Nr = 4 #  Kategorie Nr
-      Kategorie = 6
-      Beschreibung_Kategorie = 7
-      Unterkategorie = 12
-      Positions_Nummer = 15
-      Limitation = 16
-      Bezeichnung = 17
-      Menge = 18
-      Einheit = 19
-      Max_Price = 20 #      Höchstvergütungsbetrag =
-      Revision_Valid_since = 22 # Revision Gültig ab
+      }.freeze
+      Produktegruppe_Nr = 0 # rubocop:disable Naming/ConstantName
+      Limitation_Produktegruppe = 1 # rubocop:disable Naming/ConstantName
+      Produktegruppe = 2 # rubocop:disable Naming/ConstantName
+      Beschreibung_Produktegruppe = 3 # rubocop:disable Naming/ConstantName
+      Kategorie_Nr = 4 #  Kategorie Nr # rubocop:disable Naming/ConstantName
+      Kategorie = 6 # rubocop:disable Naming/ConstantName
+      Beschreibung_Kategorie = 7 # rubocop:disable Naming/ConstantName
+      Unterkategorie = 12 # rubocop:disable Naming/ConstantName
+      Positions_Nummer = 15 # rubocop:disable Naming/ConstantName
+      Limitation = 16 # rubocop:disable Naming/ConstantName
+      Bezeichnung = 17 # rubocop:disable Naming/ConstantName
+      Menge = 18 # rubocop:disable Naming/ConstantName
+      Einheit = 19 # rubocop:disable Naming/ConstantName
+      Max_Price = 20 #      Höchstvergütungsbetrag = # rubocop:disable Naming/ConstantName
+      Revision_Valid_since = 22 # Revision Gültig ab # rubocop:disable Naming/ConstantName
 
       def initialize
         @data_dir = File.expand_path("../../../data/csv", File.dirname(__FILE__))
         $stdout.sync = true
         FileUtils.mkdir_p @data_dir
-        @xls_file = File.join(@data_dir, File.basename(OriginalXLS))
+        @xls_file = File.join(@data_dir, File.basename(ORIGINAL_XLS))
         @start_time = Time.now
       end
 
@@ -109,19 +109,19 @@ module Migel
         puts "#{Time.now}: update_all using #{@xls_file}"
         base = File.basename(@xls_file, ".xls")
         xls = File.open(@xls_file, "wb+")
-        URI.open(OriginalXLS) { |f| xls.write(f.read) }
+        URI.open(ORIGINAL_XLS) { |f| xls.write(f.read) } # rubocop:disable Security/Open
         xls.close
-        actContent = File.read(@xls_file)
+        act_content = File.read(@xls_file)
 
         latest = File.join(@data_dir, base + "-latest.xls")
         target = File.join(@data_dir, "#{base}-#{Time.now.strftime("%Y.%m.%d")}.xls")
-        if !File.exist?(target) || File.read(target) != actContent
+        if !File.exist?(target) || File.read(target) != act_content
           FileUtils.cp(@xls_file, target, verbose: true, preserve: true)
         end
-        if File.exist?(latest) && File.read(latest) == actContent
+        if File.exist?(latest) && File.read(latest) == act_content
           return
         end
-        puts "#{Time.now}: update_all #{@xls_file} taken from #{OriginalXLS}"
+        puts "#{Time.now}: update_all #{@xls_file} taken from #{ORIGINAL_XLS}"
         book = Spreadsheet.open @xls_file
         LANGUAGE_NAMES.each { |language, name|
           sheet = book.worksheet(name)
@@ -134,7 +134,7 @@ module Migel
               # fix conversion to date
               if idx > 0
                 begin
-                  if date = Date.parse(row[Revision_Valid_since].to_s, "%Y.%m%.%d")
+                  if (date = Date.parse(row[Revision_Valid_since].to_s, "%Y.%m%.%d"))
                     row[Revision_Valid_since] = date.strftime("%d.%m.%Y")
                   end
                 rescue => error
@@ -288,7 +288,7 @@ module Migel
           1.upto(3) { |num|
             begin
               micd = [id[2], "00", num].join(".")
-              if mi = subgroup.migelids.find { |m| m.respond_to?(:code) && m.code == micd }
+              if (mi = (subgroup.migelids.find { |m| m.respond_to?(:code) && m.code == micd }))
                 migelid.add_migelid(mi)
               end
             rescue => error
@@ -323,7 +323,7 @@ module Migel
         compressed_file = compress(@csv_file)
         historicize(compressed_file)
         lines.concat report(lang)
-      rescue Exception => err
+      rescue => err
         lines.push(err.class.to_s, err.message, *err.backtrace)
         lines.concat report
       ensure
@@ -469,7 +469,7 @@ module Migel
           else
             "" # skip
           end
-          if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+          if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             record = {
               pharmacode: line[1],
               ean_code: line[2],
@@ -501,7 +501,7 @@ module Migel
         codes = migel_code_list.dup
         codes.each do |migel_code|
           count += 1
-          if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+          if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             migelid = migelid.dup
             migelid.products.each do |product|
               product.save
@@ -522,9 +522,9 @@ module Migel
 
       def update_products_by_migel_code(migel_code, lang = "de")
         lang.upcase!
-        if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+        if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
           migel_code = migelid.migel_code.split(".").to_s
-          if table = ODDB::Swissindex.search_migel_table(migel_code, lang)
+          if (table = ODDB::Swissindex.search_migel_table(migel_code, lang))
             table.each do |record|
               if record[:pharmacode] && record[:article_name]
                 update_product(migelid, record, lang)
@@ -578,4 +578,4 @@ module Migel
   end
 end
 
-include Migel::Util
+include Migel::Util # rubocop:disable Style/MixinUsage

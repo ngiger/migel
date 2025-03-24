@@ -63,9 +63,9 @@ module Migel
         expect(report.find { |line| no_csv_file.eql?(line) }).to eq(no_csv_file)
       end
     end
-    MigelTestCode = "05.02.03.00.1"
-    VenoTrainCode = "17.01.02.00.1"
-    GenuTrainCode = "05.04.04.00.1"
+    MIGEL_TEST_CODE = "05.02.03.00.1"
+    VENO_TEST_CODE = "17.01.02.00.1"
+    GENU_TEST_CODE = "05.04.04.00.1"
     describe CsvImporter, "Examples" do
       before(:each) do
         set_test_mail
@@ -82,7 +82,7 @@ module Migel
         expect(multilingual).to receive(:save).with(no_args).and_return(nil).never
         product_2244350 = double("product_2244350",
           :article_name => multilingual,
-          :migel_code => MigelTestCode,
+          :migel_code => MIGEL_TEST_CODE,
           :ean_code= => nil,
           :pharmacode => "2244350",
           :odba_delete => nil)
@@ -93,12 +93,12 @@ module Migel
 
         product_with_ean = double("product_with_ean",
           :article_name => multilingual,
-          :migel_code => VenoTrainCode,
+          :migel_code => VENO_TEST_CODE,
           :ean_code => "4026358067614",
           :ean_code= => nil)
         expect(product_with_ean).to receive(:pharmacode).with(no_args).and_return(nil).never
         migelid = double("migelid",
-          migel_code: MigelTestCode,
+          migel_code: MIGEL_TEST_CODE,
           delete: true,
           products: [product_2244350],
           add_product: nil,
@@ -122,20 +122,20 @@ module Migel
         @server = Migel::Util::Server.new
         allow_any_instance_of(DRbObject).to receive(:session).and_return(@server)
         allow(DRbObject).to receive(:new).and_return(@server)
-        allow(ODBA.cache).to receive(:fetch_named).with("all_products", any_args).and_return({MigelTestCode => product_2244350, VenoTrainCode => product_with_ean})
+        allow(ODBA.cache).to receive(:fetch_named).with("all_products", any_args).and_return({MIGEL_TEST_CODE => product_2244350, VENO_TEST_CODE => product_with_ean})
         expect(Migel::Model::Product).to receive(:all).with(no_args).and_return([product_2244350, product_with_ean]).at_least(1)
         expect(Migel::Model::Migelid).to receive(:all).with(no_args).and_return([migelid]).once
         expect(Migel::Model::Migelid).to receive(:all).with(no_args).and_return([]).once
         expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with("9999.99.99.99").and_return(nil).once
         migelid_genutrain = double("migelid_genutrain",
-          migel_code: GenuTrainCode,
+          migel_code: GENU_TEST_CODE,
           delete: true,
           products: [],
           add_product: nil,
           save: nil)
-        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(GenuTrainCode).and_return(migelid_genutrain).at_least(1)
-        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(MigelTestCode).and_return(migelid).twice
-        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(VenoTrainCode).and_return(migelid).once
+        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(GENU_TEST_CODE).and_return(migelid_genutrain).at_least(1)
+        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(MIGEL_TEST_CODE).and_return(migelid).twice
+        expect(Migel::Model::Migelid).to receive(:find_by_migel_code).with(VENO_TEST_CODE).and_return(migelid).once
         double("group",
           name: "name",
           update_limitation_text: nil,

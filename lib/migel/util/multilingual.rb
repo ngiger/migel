@@ -20,6 +20,10 @@ module Migel
         @canonical.empty?
       end
 
+      def respond_to_missing?
+        true
+      end
+
       def method_missing(meth, *args, &block)
         case meth.to_s
         when /^[a-z]{2}$/
@@ -104,7 +108,7 @@ module Migel
         # [@parent.subgroup.group, @parent.subgroup, @parent]
         ancestors = []
         me = self
-        while parent = me.parent
+        while (parent = me.parent)
           ancestors.unshift parent
           me = parent
         end

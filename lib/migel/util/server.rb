@@ -147,7 +147,7 @@ module Migel
       def search_migel_product_by_migel_code(migel_code, sortvalue = nil, reverse = nil)
         if (migelid = Migel::Model::Migelid.search_by_migel_code(migel_code).first) && (products = migelid.products)
           sortvalue ||= :pharmacode
-          if products = sort_select_products(products, sortvalue, reverse)
+          if (products = sort_select_products(products, sortvalue, reverse))
             ODBA::DRbWrapper.new(products)
           end
         end
@@ -194,7 +194,7 @@ module Migel
         products = result
 
         sortvalue ||= :pharmacode
-        if products = sort_select_products(products, sortvalue, reverse)
+        if (products = sort_select_products(products, sortvalue, reverse))
           ODBA::DRbWrapper.new(products)
         end
       end
@@ -202,15 +202,15 @@ module Migel
       def search_limitation(migel_code)
         case migel_code.length
         when 2 # Group
-          if group = Migel::Model::Group.find_by_migel_code(migel_code)
+          if (group = Migel::Model::Group.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(group.limitation_text)
           end
         when 5 # Subgroup
-          if subgroup = Migel::Model::Subgroup.find_by_migel_code(migel_code)
+          if (subgroup = Migel::Model::Subgroup.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(subgroup.limitation_text)
           end
         else # Migelid
-          if migelid = Migel::Model::Migelid.find_by_migel_code(migel_code)
+          if (migelid = Migel::Model::Migelid.find_by_migel_code(migel_code))
             ODBA::DRbWrapper.new(migelid.limitation_text)
           end
         end

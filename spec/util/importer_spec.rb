@@ -459,7 +459,7 @@ module Migel
         file_name = "#{Dir.tmpdir}/file"
         before do
           allow(File).to receive(:mtime)
-          my_file = File.open(file_name, "w+") { |f| f.puts "#Created by #{__FILE__}/#{__LINE__}" }
+          File.open(file_name, "w+") { |f| f.puts "#Created by #{__FILE__}/#{__LINE__}" }
           puts "file_name: #{file_name}"
           allow(File).to receive(:open)
           @gz = double("gz",
@@ -519,7 +519,7 @@ module Migel
 
     describe "RealWorld: create 3 language specific CSV files from the given xls file" do
       before(:each) do
-        @saved_xls = Migel::Util::Importer::OriginalXLS
+        @saved_xls = Migel::Util::Importer::ORIGINAL_XLS
         allow(ODBA.cache).to receive(:index_keys).and_return(["migel_code"])
         multilingual = double("multilingual", de: "")
         product = double("product", article_name: multilingual)
@@ -527,7 +527,7 @@ module Migel
         allow(Migel::Model::Migelid).to receive(:find_by_migel_code).and_return(migelid)
       end
       after(:each) do
-        Migel::Util::Importer::OriginalXLS = @saved_xls
+        Migel::Util::Importer::ORIGINAL_XLS = @saved_xls
       end
 
       def setup_importer
@@ -550,18 +550,18 @@ module Migel
 
       it "missing_article_name_migel_code_list should return missing migel code list" do
         setup_importer
-        Migel::Util::Importer::OriginalXLS = @test_file
+        Migel::Util::Importer::ORIGINAL_XLS = @test_file
         @importer.update_all
         expect(@importer.xls_file).to match(/MiGeL.xls/)
         expect(Dir.glob(File.join(@importer.data_dir, "*.csv")).size).to eq(3)
-        baseNames = Dir.glob(File.join(@importer.data_dir, "*.csv")).collect { |f| File.basename(f) }
+        base_names = Dir.glob(File.join(@importer.data_dir, "*.csv")).collect { |f| File.basename(f) }
         {"migel_de.csv" =>
             "Produktegruppe Nr,Limitation Produktegruppe,Produktegruppe,Beschreibung Produktegruppe,Kategorie Nr,Limitation Kategorie,Kategorie,Beschreibung Kategorie,Revision Kaegorie,Revision Kat Gültig ab,Unterkategorie Nr,Limitation Unterkategorie,Unterkategorie,Positions Nummer,Limitation,Bezeichnung,Menge,Einheit,Höchstvergütungsbetrag,Revision Position,Revision Gültig ab",
          "migel_fr.csv" =>
             "Groupe de produits No,Limitation Groupe de produits,Groupe de produits,Description Groupes de produits,Catégorie No,Limitation Catégorie,Catégorie,Description Catégorie,Revision Catégorie,Valable à partir du (Revision Catégorie),Sous-catégorie No,Limitation Sous-catégorie,Sous-catégorie,No pos.,Limitation,Dénomination,Quantité,Unité de mesure,Montant,Revision,Valable à partir du",
          "migel_it.csv" =>
             "Gruppi di prodotti No,Limitazione (Gruppi di prodotti),Gruppi di prodotti,Descrizione,Categoria No,Limitazione (Categoria),Categoria,Descrizione Categoria,Revisione Categoria,Valida a partire dal (Revisione Categoria),Sotto-categoria No,Limitazione Sotto-categoria,Sotto-categoria,Numero di posizione,Limitazione,Denominazione,Quantita,Unità,Importo Massimo,Revisione,Valida a partire dal"}.each do |csv_file, firstline|
-          expect(baseNames.index(csv_file)).not_to eq(nil)
+          expect(base_names.index(csv_file)).not_to eq(nil)
           lines = CSV.readlines(File.join(@importer.data_dir, csv_file))
           expect(lines[1].join(",")).to match(/^01.,/)
           next unless /_de.csv/.match?(csv_file)
@@ -580,7 +580,7 @@ module Migel
           delivery_method :test
         end
         ::Mail::TestMailer.deliveries.clear
-        Migel::Util::Importer::OriginalXLS = @test_file
+        Migel::Util::Importer::ORIGINAL_XLS = @test_file
         @importer.save_all_products_all_languages
         expect(::Mail::TestMailer.deliveries.size).to eq(3)
         ::Mail::TestMailer.deliveries.each { |mail| expect(mail.to_s).not_to match(/RuntimeError/) }
@@ -592,7 +592,7 @@ module Migel
         end
         # https://www.bag.admin.ch/bag/de/home/versicherungen/krankenversicherung/krankenversicherung-leistungen-tarife/Mittel-und-Gegenstaendeliste.html
         setup_importer
-        Migel::Util::Importer::OriginalXLS = @test_file
+        Migel::Util::Importer::ORIGINAL_XLS = @test_file
         @importer.update_all
         expect(@importer.xls_file).to match(/MiGeL.xls/)
         files = Dir.glob(File.join(@importer.data_dir, "*.csv"))

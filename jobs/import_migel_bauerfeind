@@ -1,22 +1,22 @@
 #!/usr/local/bin/ruby
 # must be scheduled in crontab to run as the same user as oddb
 
-$: << File.expand_path('../lib', File.dirname(__FILE__))
-$: << File.expand_path('..', File.dirname(__FILE__))
+$: << File.expand_path("../lib", File.dirname(__FILE__))
+$: << File.expand_path("..", File.dirname(__FILE__))
 
 # set default argument. Must be set before requiring migel/util/job !!!
-ARGV[0] ||= '/var/www/migel/data/csv/update_migel_bauerfeind.csv' if ARGV.size == 0
-require 'migel/util/job'
-require 'migel/util/csv_importer'
+ARGV[0] ||= "/var/www/migel/data/csv/update_migel_bauerfeind.csv" if ARGV.size == 0
+require "migel/util/job"
+require "migel/util/csv_importer"
 
 module Migel
   module Util
     Job.run do |system|
       importer = CsvImporter.new
       options = {
-        :report => true,
-        :estimate => true,
-        :filename => ARGV[0]
+        report: true,
+        estimate: true,
+        filename: ARGV[0]
       }
       importer.import_all_products_from_csv(options)
       puts importer.report

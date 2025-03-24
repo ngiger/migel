@@ -21,7 +21,7 @@ module Migel
       def cascade(action, next_level)
         if next_level.is_a?(Array)
           if action == :delete
-            while element = next_level.shift
+            while (element = next_level.shift)
               cascade(action, element)
             end
           else
@@ -216,6 +216,10 @@ module Migel
 
     def pointer
       "pointer"
+    end
+
+    def respond_to_missing?
+      true
     end
 
     def method_missing(meth, *args, &block)

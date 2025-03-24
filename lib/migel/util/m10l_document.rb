@@ -28,6 +28,10 @@ module Migel
         @canonical.empty?
       end
 
+      def respond_to_missing?
+        true
+      end
+
       def method_missing(meth, *args, &block)
         case meth.to_s
         when /^([a-z]{2})=$/

@@ -42,7 +42,7 @@ module Migel
             Migel.debug_msg "save_all_products migel_code #{migel_code} count #{count} Migel::DebugMigel #{Migel::DebugMigel}"
             # break if /2/.match(migel_code) and Migel::DebugMigel
             product_flag = false
-            if migelid = get_migelid_by_migel_code(migel_code)
+            if (migelid = get_migelid_by_migel_code(migel_code))
               migel_code = migelid.migel_code.split(".").join
               table = swissindex.search_migel_table(migel_code, "MiGelCode", lang)
               if table.empty?
